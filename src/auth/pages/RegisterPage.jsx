@@ -1,9 +1,9 @@
 import {Link as RouterLink} from 'react-router-dom';
-import { Button, Grid, Link, TextField, Typography } from '@mui/material';
-import React, { useState } from 'react';
+import { Alert, Button, Grid, Link, TextField, Typography } from '@mui/material';
+import React, { useMemo, useState } from 'react';
 import { AuthLayout } from '../layout';
 import { useForm } from '../../hooks';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { startCreatingUserWithEmailPassword } from '../../store/auth';
 
 const formInitialData = {
@@ -20,6 +20,8 @@ const formValidations = {
 
 export const RegisterPage = () => {
   const dispatch = useDispatch();
+  const {status,errorMessage} = useSelector(state=>state.auth);
+  const isCheckingAuthentication = useMemo(()=>status === 'cheking',[status]);
   const [formSubmitted,setFormSubmitted] = useState(false);
   const {displayName = '',email = '',password = '',onInputChange,formState,isFormValid,displayNameValid,emailValid,passwordValid} = useForm(formInitialData,formValidations);
   const onSubmit = (e) => {
@@ -30,7 +32,7 @@ export const RegisterPage = () => {
   }
   return (
     <AuthLayout title='Crear cuenta'>
-      <form onSubmit={onSubmit}>
+      <form onSubmit={onSubmit} className='animate__animated animate__fadeIn animate__faster'>
           <Grid container>
             <Grid item xs={12} sx={{marginTop: 2}}>
               <TextField 
@@ -72,8 +74,11 @@ export const RegisterPage = () => {
               />
             </Grid>
             <Grid container spacing={2} sx={{marginBottom: 2, marginTop: 1}}>
+              <Grid item xs={12} display={!!errorMessage ? '' : 'none'}>
+                <Alert severity='error'>{errorMessage}</Alert>
+              </Grid>
               <Grid item xs={12}>
-                <Button onClick={onSubmit} variant='contained' fullWidth>
+                <Button disabled={isCheckingAuthentication} onClick={onSubmit} variant='contained' fullWidth>
                   Crear cuenta
                 </Button>
               </Grid>
